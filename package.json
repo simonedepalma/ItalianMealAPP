@@ -1,0 +1,15 @@
+{
+  "name": "italianmealapp",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "tsc": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
