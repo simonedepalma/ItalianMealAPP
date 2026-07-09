@@ -19,6 +19,6 @@ export async function saveFavoriteIds(ids: string[]): Promise<void> {
   try {
     await AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(ids));
   } catch {
-   
+    
   }
 }
