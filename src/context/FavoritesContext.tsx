@@ -9,8 +9,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFavorites } from "../src/services/useFavorites";
-import { fetchItalianMeals } from "../src/services/mealAPI";
+import { useFavorites } from "../services/useFavorites";
+import { fetchItalianMeals } from "../services/mealAPI";
 
 interface MealSummary {
   idMeal: string;

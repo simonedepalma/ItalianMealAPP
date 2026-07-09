@@ -1,22 +1,51 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { FavoriteButton } from "../components/FavoriteButton";
 import { useFavorites } from "../services/useFavorites";
-
-const DATA = [
-  { id: "a1", title: "Alpha", description: "First item" },
-  { id: "b2", title: "Beta", description: "Second item" },
-  { id: "c3", title: "Gamma", description: "Third item" },
-];
+import { getMealById } from "../services/useMeals";
 
 export function DetailsScreen({ navigation, route }: any) {
   const id = route.params?.id;
   const { favoriteIds, toggleFavorite } = useFavorites();
+  const [meal, setMeal] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    let isActive = true;
+    async function loadMeal() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getMealById(id);
+        if (isActive) setMeal(data);
+      } catch {
+        if (isActive) setError("Impossibile caricare il dettaglio del piatto.");
+      } finally {
+        if (isActive) setLoading(false);
+      }
+    }
+
+    loadMeal();
+    return () => {
+      isActive = false;
+    };
+  }, [id]);
 
   if (!id) return <Text style={{ padding: 16 }}>Invalid route param</Text>;
-
-  const item = DATA.find((x) => x.id === id);
-  if (!item) return <Text style={{ padding: 16 }}>Product not found</Text>;
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+  if (error || !meal) return <Text style={{ padding: 16 }}>{error ?? "Product not found"}</Text>;
 
   const isFavorite = favoriteIds.includes(id);
 
@@ -27,10 +56,10 @@ export function DetailsScreen({ navigation, route }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.title}>{meal.strMeal}</Text>
         <FavoriteButton idMeal={id} isFavorite={isFavorite} onToggle={handleToggleFavorite} />
       </View>
-      <Text>{item.description}</Text>
+      <Text style={styles.description}>{meal.description || "Nessuna descrizione disponibile."}</Text>
       <Pressable style={styles.button} onPress={() => navigation.goBack()}>
         <Text style={styles.buttonText}>Go back</Text>
       </Pressable>
@@ -40,6 +69,7 @@ export function DetailsScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
+  centered: { justifyContent: "center", alignItems: "center" },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -47,6 +77,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: { fontSize: 22, fontWeight: "700", flex: 1, marginRight: 8 },
+  description: { fontSize: 16, lineHeight: 22 },
   button: {
     alignSelf: "flex-start",
     paddingVertical: 10,
@@ -54,6 +85,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     backgroundColor: "#f0f0f0",
+    marginTop: 16,
   },
   buttonText: { fontWeight: "600" },
 });
